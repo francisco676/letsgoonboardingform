@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RallyUp — Let's Go Content Intake</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --primary: #3D68F5;
+    --accent-1: #7B6BE6;
+    --accent-2: #2DD4A8;
+    --dark: #0F1923;
+    --card: #161F2C;
+    --border: rgba(255,255,255,0.08);
+    --gray: #8896A6;
+    --white: #F1F5F9;
+    --radius: 14px;
+  }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--dark);
+    color: var(--white);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  .header {
+    padding: 32px 24px 0;
+    max-width: 640px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .logo-row {
+    display: flex; align-items: center; justify-content: center;
+    gap: 12px; margin-bottom: 20px;
+  }
+  .logo-ru {
+    width: 48px; height: 48px;
+    background: linear-gradient(180deg, var(--primary), var(--accent-1));
+    border-radius: var(--radius);
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .logo-ru svg { width: 26px; height: 26px; }
+  .logo-x {
+    font-size: 16px; color: rgba(255,255,255,0.25); font-weight: 500;
+  }
+  .logo-chip {
+    background: white; border-radius: var(--radius);
+    padding: 10px 16px; display: inline-flex; align-items: center;
+  }
+  .done .logo-chip { margin-bottom: 20px; padding: 12px 18px; }
+  .header h1 { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
+  .header p { color: var(--gray); font-size: 15px; max-width: 480px; margin: 0 auto 8px; }
+  .time-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(45,212,168,0.1); border: 1px solid rgba(45,212,168,0.25);
+    color: #2DD4A8; font-size: 13px; font-weight: 600;
+    padding: 6px 16px; border-radius: 50px; margin-top: 12px;
+  }
+
+  .progress-wrap { max-width: 640px; margin: 28px auto 0; padding: 0 24px; }
+  .progress-bar {
+    height: 4px; background: rgba(255,255,255,0.06);
+    border-radius: 4px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--primary), var(--accent-1));
+    border-radius: 4px; transition: width 0.5s cubic-bezier(0.22,1,0.36,1);
+  }
+  .progress-label {
+    display: flex; justify-content: space-between; margin-top: 8px;
+    font-size: 12px; color: var(--gray); font-weight: 500;
+  }
+
+  .container { max-width: 640px; margin: 0 auto; padding: 24px 24px 120px; }
+
+  .section { display: none; animation: fadeIn 0.4s ease; }
+  .section.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .section-label {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.5px; color: var(--primary); margin-bottom: 8px;
+  }
+  .block-label {
+    display: inline-block;
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.2px; color: var(--accent-2);
+    background: rgba(45,212,168,0.08);
+    border: 1px solid rgba(45,212,168,0.2);
+    padding: 4px 10px; border-radius: 50px;
+    margin-bottom: 14px;
+  }
+  .section-title { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .section-desc { font-size: 14px; color: var(--gray); margin-bottom: 28px; }
+
+  .question { margin-bottom: 28px; }
+  .q-label {
+    font-size: 15px; font-weight: 600; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .q-hint { font-size: 13px; color: var(--gray); margin-bottom: 10px; font-style: italic; }
+
+  textarea, input[type="text"], input[type="email"] {
+    width: 100%; background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 16px; color: var(--white);
+    font-family: inherit; font-size: 15px; resize: vertical;
+    transition: border-color 0.2s; outline: none;
+  }
+  textarea:focus, input[type="text"]:focus, input[type="email"]:focus {
+    border-color: rgba(74,156,245,0.5);
+  }
+  textarea { min-height: 88px; }
+  textarea.tall { min-height: 160px; }
+  textarea.x-tall { min-height: 220px; }
+
+  .radio-group { display: flex; flex-direction: column; gap: 8px; }
+  .radio-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 12px 14px; background: var(--card);
+    border: 1px solid var(--border); border-radius: 12px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .radio-row:hover { border-color: rgba(74,156,245,0.4); background: rgba(74,156,245,0.06); }
+  .radio-row.selected {
+    background: rgba(74,156,245,0.10); border-color: var(--primary);
+  }
+  .radio-row input[type="radio"] {
+    margin-top: 4px; accent-color: var(--primary);
+  }
+  .radio-row .rl { font-size: 14px; font-weight: 500; }
+
+  .inline-text { margin-top: 10px; display: none; }
+  .inline-text.show { display: block; }
+
+  .nav-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(15,25,35,0.92); backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border); padding: 16px 24px;
+    display: flex; justify-content: space-between; align-items: center;
+    max-width: 640px; margin: 0 auto;
+    z-index: 100;
+  }
+  @media(min-width:641px) {
+    .nav-bar { left: 50%; transform: translateX(-50%); border-radius: 20px 20px 0 0; }
+  }
+  .btn {
+    padding: 12px 28px; border-radius: 12px; font-size: 15px;
+    font-weight: 600; cursor: pointer; border: none;
+    font-family: inherit; transition: all 0.2s;
+  }
+  .btn-ghost { background: transparent; color: var(--gray); }
+  .btn-ghost:hover { color: var(--white); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--accent-1));
+    color: white;
+  }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-submit {
+    background: linear-gradient(135deg, #2DD4A8, #1DB88E);
+    color: white;
+  }
+  .btn:disabled { opacity: 0.4; cursor: default; transform: none; }
+
+  .welcome { text-align: center; padding: 40px 0 0; }
+  .welcome h2 { font-size: 28px; font-weight: 800; margin-bottom: 12px; }
+  .welcome p { color: var(--gray); font-size: 16px; max-width: 460px; margin: 0 auto 32px; line-height: 1.65; }
+  .welcome-cards {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    text-align: left; margin-bottom: 32px;
+  }
+  .wc {
+    padding: 16px; background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .wc h4 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .wc p { font-size: 12px; color: var(--gray); margin: 0; }
+
+  .done { text-align: center; padding: 60px 0; }
+  .done h2 { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+  .done p { color: var(--gray); font-size: 16px; max-width: 420px; margin: 0 auto; line-height: 1.6; }
+
+  @media(max-width:480px) {
+    .welcome-cards { grid-template-columns: 1fr; }
+    .header h1 { font-size: 22px; }
+    .section-title { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script>
+  // ============================================================
+  // App shell (open access — no token gate, matches canonical reference form)
+  // ============================================================
+  var LG_LOGO = '<span style="font-weight:800;font-size:20px;letter-spacing:-0.5px;color:#0F1923;line-height:1;">Let\'s&nbsp;Go&nbsp;🚀</span>';
+
+  document.getElementById('root').innerHTML = ''
+    + '<div class="header">'
+    + '  <div class="logo-row">'
+    + '    <div class="logo-ru"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/></svg></div>'
+    + '    <span class="logo-x">x</span>'
+    + '    <div class="logo-chip">' + LG_LOGO + '</div>'
+    + '  </div>'
+    + '  <h1>Executive Content Intake</h1>'
+    + '  <p>Voice, audience, and the stories your posts can\'t reach.</p>'
+    + '  <div class="time-badge">Takes about 12 minutes</div>'
+    + '</div>'
+    + '<div class="progress-wrap"><div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>'
+    + '  <div class="progress-label"><span id="sectionLabel">Welcome</span><span id="progressPct">0%</span></div>'
+    + '</div>'
+    + '<div class="container" id="app"></div>'
+    + '<div class="nav-bar">'
+    + '  <button class="btn btn-ghost" id="btnBack" onclick="goBack()">Back</button>'
+    + '  <button class="btn btn-primary" id="btnNext" onclick="goNext()">Get Started</button>'
+    + '</div>';
+
+  // ============================================================
+  // Session + Apps Script wiring
+  // ============================================================
+  var SESSION_ID = (Date.now().toString(36) + Math.random().toString(36).substr(2, 9));
+  var APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx__bnupYxcZGEdcyCtF-3zJMbNLi4071MP1iu3XSQWGMHarcbgNLzhDorK0RnikfVW/exec';
+  var state = {};
+
+  function sendEvent(event, fields) {
+    Object.assign(state, fields || {});
+    state.event = event;
+    state.session_id = SESSION_ID;
+    state.timestamp = new Date().toISOString();
+    try {
+      fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(state),
+        redirect: 'follow'
+      });
+    } catch (e) { /* network noise — swallow */ }
+  }
+
+  // ============================================================
+  // Sections — 10 questions across 3 blocks
+  //   Block A · Voice & Audience       → Q1, Q2, Q3
+  //   Block B · Your Story (2 posts)   → Q4 (see), Q5 (don't see), Q6 (timeline)
+  //   Block C · Depth & Boundaries     → Q7 (origin), Q8 (framework), Q9 (book), Q10 (guardrails)
+  // ============================================================
+  var sections = [
+    // 0: Welcome
+    { id: 'welcome', label: 'Welcome', type: 'welcome', render: function () {
+      return ''
+        + '<div class="welcome">'
+        + '  <h2>Hey Moe</h2>'
+        + '  <p>You already have the stories, the network, and the energy. This fills in what we can\'t see from your profile: who you want reading now, and the raw material we\'ll turn into your first standout posts. Answer fast, first instinct, no editing. Let\'s go.</p>'
+        + '  <div class="welcome-cards">'
+        + '    <div class="wc"><h4>10 short questions</h4><p>3 blocks: voice, your story, depth</p></div>'
+        + '    <div class="wc"><h4>About 12 minutes</h4><p>Coffee-length</p></div>'
+        + '    <div class="wc"><h4>No wrong answers</h4><p>First instinct wins</p></div>'
+        + '    <div class="wc"><h4>Stays between us</h4><p>Only your content team sees it</p></div>'
+        + '  </div>'
+        + '</div>';
+    }},
+
+    // ─── BLOCK A · Voice & Audience ───────────────────────────────
+
+    // 1: Q1 — Who do you want to reach? (open)
+    { id: 'q1', label: 'Voice & Audience', type: 'question', qNum: 1, qKey: 'q1', render: function () {
+      return ''
+        + '<div class="block-label">Block A · Voice &amp; Audience</div>'
+        + '<div class="section-label">Question 1 of 10</div>'
+        + '<div class="section-title">Who do you want to reach on LinkedIn?</div>'
+        + '<div class="section-desc">Not everyone — your inner circle. The people whose attention would move Let\'s Go this year. You said the early focus is the demand side: SMB teams that need to upskill. Think about who actually signs off on that.</div>'
+        + '<div class="question">'
+        + '  <div class="q-label">Describe them in your own words.</div>'
+        + '  <div class="q-hint">Be specific. From your world: L&amp;D and HR leaders, CFOs / ops leaders, and GTM managers at small-to-mid businesses who are under pressure to make their teams AI-capable, fast. Plus anyone else you want in your corner before launch.</div>'
+        + '  <textarea class="tall" data-key="q1" placeholder="e.g., Heads of L&amp;D and HR, plus GTM and ops managers at SMBs who know their teams need to level up on AI but have no good way to make it happen..."></textarea>'
+        + '</div>';
+    }},
+
+    // 2: Q2 — How do you want them to see YOU? (radio + Other)
+    { id: 'q2', label: 'Voice & Audience', type: 'question', qNum: 2, qKey: 'q2', render: function () {
+      return ''
+        + '<div class="block-label">Block A · Voice &amp; Audience</div>'
+        + '<div class="section-label">Question 2 of 10</div>'
+        + '<div class="section-title">How do you want them to see <em>you</em>?</div>'
+        + '<div class="section-desc">When someone describes you to a peer, what line do you want them to use? Pick the closest or write your own.</div>'
+        + '<div class="question">'
+        + '  <div class="q-label">Choose the closest framing.</div>'
+        + '  <div class="radio-group" data-key="q2">'
+        + '    <label class="radio-row"><input type="radio" name="q2" value="The inspirational operator"><span class="rl"><strong>The inspirational operator</strong> → built and sold real things (Triple Whale, Winfluencers), but leads with human potential and a warm nudge, not hustle metrics</span></label>'
+        + '    <label class="radio-row"><input type="radio" name="q2" value="The non-technical founder who ships"><span class="rl"><strong>The non-technical founder who ships</strong> → "non-technical guy in tech" now building with AI; living proof you don\'t need to be an engineer</span></label>'
+        + '    <label class="radio-row"><input type="radio" name="q2" value="The human-potential mentor"><span class="rl"><strong>The human-potential mentor</strong> → teacher at heart, obsessed with helping people reach their potential (talks, the book, your kids)</span></label>'
+        + '    <label class="radio-row"><input type="radio" name="q2" value="The practical-AI guide for everyone"><span class="rl"><strong>The practical-AI guide for everyone</strong> → makes AI accessible, useful, and fun for non-technical SMB people</span></label>'
+        + '    <label class="radio-row"><input type="radio" name="q2" value="Other"><span class="rl"><strong>Other</strong> → write your own framing</span></label>'
+        + '  </div>'
+        + '  <div class="inline-text" data-reveal-for="Other">'
+        + '    <textarea data-key="q2_other" placeholder="How do you want to be seen, in your own words?"></textarea>'
+        + '  </div>'
+        + '</div>';
+    }},
+
+    // 3: Q3 — How do you want them to see Let's Go + what's safe to say now (open)
+    { id: 'q3', label: 'Voice & Audience', type: 'question', qNum: 3, qKey: 'q3', render: function () {
+      return ''
+        + '<div class="block-label">Block A · Voice &amp; Audience</div>'
+        + '<div class="section-label">Question 3 of 10</div>'
+        + '<div class="section-title">How should people eventually see <em>Let\'s Go</em> — and what\'s safe to say <em>now</em>?</div>'
+        + '<div class="section-desc">Two parts. First: when Let\'s Go is public, how do you want a customer to describe it in one line? Second, and important: you\'re still quasi-stealth, so tell us what we can hint at publicly today versus what we keep under wraps until the beta.</div>'
+        + '<div class="question">'
+        + '  <div class="q-label">The one-liner + your disclosure line.</div>'
+        + '  <div class="q-hint">e.g., one-liner: "the Airbnb for learning any skill, 1:1, with a real outcome." Disclosure: "fine to talk about the broken way we learn + the human edge; do NOT reveal the marketplace mechanics or pricing yet."</div>'
+        + '  <textarea class="tall" data-key="q3" placeholder="One-liner: ... \nSafe to say now: ... \nKeep under wraps until beta: ..."></textarea>'
+        + '</div>';
+    }},
+
+    // ─── BLOCK B · Your Story (Two Signature Posts) ───────────────
+
+    // 4: Q4 — "What people SEE" (open, list)
+    { id: 'q4', label: 'Your Story', type: 'question', qNum: 4, qKey: 'q4', render: function () {
+      return ''
+        + '<div class="block-label">Block B · Your Story</div>'
+        + '<div class="section-label">Question 4 of 10</div>'
+        + '<div class="section-title">What do people <em>see</em> when they look at your journey?</div>'
+        + '<div class="section-desc">First half of a post we love running for founders: the highlight reel. The wins, titles, and milestones the outside world knows you for.</div>'
+        + '<div class="question">'
+        + '  <div class="q-label">List 4–6 things people see (the public version).</div>'
+        + '  <div class="q-hint">One per line, with real numbers where you have them. e.g., "Chief of Staff then VP BD at Triple Whale," "founded Winfluencers," "published author + speaker (Miami, NYC, SF)," "7.5K+ LinkedIn followers," "built a 650+ member community from zero." Just the visible facts for now.</div>'
+        + '  <textarea class="tall" data-key="q4" placeholder="1. \n2. \n3. \n4. \n5. "></textarea>'
+        + '</div>';
+    }},
+
+    // 5: Q5 — "What people DON'T see" (open, tall)
+    { id: 'q5', label: 'Your Story', type: 'question', qNum: 5, qKey: 'q5', render: function () {
+      return ''
+        + '<div class="block-label">Block B · Your Story</div>'
+        + '<div class="section-label">Question 5 of 10</div>'
+        + '<div class="section-title">What do people <em>not</em> see?</div>'
+        + '<div class="section-desc">The other half, and the part that makes the post land. The cost behind each win: the doubt, the sacrifices, the things that went wrong, the unglamorous grind nobody posts about.</div>'
+        + '<div class="question">'
+        + '  <div class="q-label">List 4–6 things people don\'t see — be honest, even uncomfortable.</div>'
+        + '  <div class="q-hint">One per line. e.g., "the ventures that didn\'t work," "the hours," "going solo-founder with five kids and a move across the world," "the fundraise that took longer than planned," "the quiet do-I-just-get-a-normal-job doubts." Specifics beat platitudes.</div>'
+        + '  <textarea class="tall" data-key="q5" placeholder="1. \n2. \n3. \n4. \n5. "></textarea>'
+        + '</div>';
+    }},
+
+    // 6: Q6 — Timeline post (open, tall)
+    { id: 'q6', label: 'Your Story', type: 'question', qNum: 6, qKey: 'q6', render: function () {
+      return ''
+        + '<div class="block-label">Block B · Your Story</div>'
+        + '<div class="section-label">Question 6 of 10</div>'
+        + '<div class="section-title">Map your journey by year.</div>'
+        + '<div class="section-desc">Second signature post: a timeline. The turning points that got you here, year by year. We\'ll shape it into the narrative; you just give us the raw markers.</div>'
+        + '<div class="question">'
+        + '  <div class="q-label">Give us 5–8 turning-point years and what happened at each.</div>'
+        + '  <div class="q-hint">Format: <strong>YEAR — what happened (win or loss, and why it mattered)</strong>, one per line. Include the unglamorous turns, not just the wins. e.g., "2014 — as a teenager, was a movie extra; learned what\'s really behind a polished performance." Real years, please.</div>'
+        + '  <textarea class="x-tall" data-key="q6" placeholder="20XX — \n20XX — \n20XX — \n20XX — \n20XX — \n20XX — "></textarea>'
+        + '</div>';
+    }},
+
+    // ─── BLOCK C · Depth & Boundaries ─────────────────────────────
+
+    // 7: Q7 — The origin moment / why Let's Go (open, tall)
+    { id: 'q7', label: 'Depth', type: 'question', qNum: 7, qKey: 'q7', render: function () {
+      return ''
+        + '<div class="block-label">Block C · Depth &amp; Boundaries</div>'
+        + '<div class="section-label">Question 7 of 10</div>'
+        + '<div class="section-title">The moment Let\'s Go <em>had</em> to exist.</div>'
+        + '<div class="section-desc">This is the one we\'ll mine for years: your origin spine. You\'ve been circling this your whole career — running 1:1 learning at Partners in Torah, the talks, teaching your own kids by building with them. We want the specific moment it clicked into a company.</div>'
+        + '<div class="question">'
+        + '  <div class="q-label">Tell the story — the room, the conversation, what flipped it.</div>'
+        + '  <div class="q-hint">Go emotional and specific over polished. Tell it like you\'d tell a close friend. Was there a person who couldn\'t learn the skill they needed? A moment the "old way" of learning visibly failed someone? What did it cost you to commit?</div>'
+        + '  <textarea class="tall" data-key="q7" placeholder="Start anywhere. Don\'t edit while writing. First pass. Get it out."></textarea>'
+        + '</div>';
+    }},
+
+    // 8: Q8 — Name your framework (open)
+    { id: 'q8', label: 'Depth', type: 'question', qNum: 8, qKey: 'q8', render: function () {
+      return ''
+        + '<div class="block-label">Block C · Depth &amp; Boundaries</div>'
+        + '<div class="section-label">Question 8 of 10</div>'
+        + '<div class="section-title">Do you have a name for what you teach?</div>'
+        + '<div class="section-desc">You repeat a few load-bearing ideas — "show up," "be the living embodiment of the message," "the human edge," and "make their unique EPIC impact." Named ideas become your IP and the spine of a content series. Let\'s capture or coin them.</div>'
+        + '<div class="question">'
+        + '  <div class="q-label">Name the framework(s) — or tell us they\'re unnamed and we\'ll coin them together.</div>'
+        + '  <div class="q-hint">Is "EPIC" an actual acronym you teach? If so, what do the letters stand for? Same for your speaking method and your human-edge / learning model. If something isn\'t named yet, say so.</div>'
+        + '  <textarea class="tall" data-key="q8" placeholder="EPIC stands for... \nMy learning/human-edge model is called... \nMy speaking method is... \nNot named yet: ..."></textarea>'
+        + '</div>';
+    }},
+
+    // 9: Q9 — The book (open)
+    { id: 'q9', label: 'Depth', type: 'question', qNum: 9, qKey: 'q9', render: function () {
+      return ''
+        + '<div class="block-label">Block C · Depth &amp; Boundaries</div>'
+        + '<div class="section-label">Question 9 of 10</div>'
+        + '<div class="section-title">Your book — the one with the worn, underlined pages.</div>'
+        + '<div class="section-desc">You\'re a published author and it almost never shows up in your content. That\'s a huge missed well: one chapter can become several posts, and it\'s instant authority for the waitlist.</div>'
+        + '<div class="question">'
+        + '  <div class="q-label">Title, one-line premise, and the 2–3 ideas you most want to be known for.</div>'
+        + '  <div class="q-hint">Also: any line from it readers quote back to you? And would you be open to a series built around its ideas?</div>'
+        + '  <textarea class="tall" data-key="q9" placeholder="Title: ... \nPremise: ... \nIdeas I want to be known for: 1) ... 2) ... 3) ..."></textarea>'
+        + '</div>';
+    }},
+
+    // 10: Q10 — Guardrails + voice boundaries (open)
+    { id: 'q10', label: 'Depth', type: 'question', qNum: 10, qKey: 'q10', render: function () {
+      return ''
+        + '<div class="block-label">Block C · Depth &amp; Boundaries</div>'
+        + '<div class="section-label">Question 10 of 10</div>'
+        + '<div class="section-title">Anything off-limits — and how you never want to sound.</div>'
+        + '<div class="section-desc">So we never put words in your mouth you\'d regret. Topics to avoid, things you won\'t say publicly, and the tone you\'d hate to read back.</div>'
+        + '<div class="question">'
+        + '  <div class="q-label">What\'s off the table, and what should we never sound like?</div>'
+        + '  <div class="q-hint">e.g., "keep faith light and universal, never preachy," "don\'t name the fundraise or the family move," "never salesy or hype-y," "no fake vulnerability." Anything goes here.</div>'
+        + '  <textarea data-key="q10" placeholder="Avoid: ... \nNever sound: ..."></textarea>'
+        + '</div>';
+    }},
+
+    // Submit
+    { id: 'submit', label: 'Submit', type: 'submit', render: function () {
+      return ''
+        + '<div class="section-label">Final step</div>'
+        + '<div class="section-title">Thanks for the time, Moe.</div>'
+        + '<div class="section-desc">That\'s everything we needed to get started. Hit submit and your content team will take it from here. Let\'s go.</div>';
+    }},
+
+    // Done
+    { id: 'done', label: 'Done', type: 'done', render: function () {
+      return ''
+        + '<div class="done">'
+        + '  <div class="logo-chip">' + LG_LOGO + '</div>'
+        + '  <h2>All set.</h2>'
+        + '  <p>Your answers landed. Your content team will follow up with first drafts soon.</p>'
+        + '</div>';
+    }}
+  ];
+
+  // ============================================================
+  // Renderer
+  // ============================================================
+  var current = 0;
+  var answers = {};
+  var startedSent = false;
+
+  function render() {
+    var app = document.getElementById('app');
+    app.innerHTML = '<div class="section active">' + sections[current].render() + '</div>';
+
+    app.querySelectorAll('[data-key]').forEach(function (el) {
+      var k = el.dataset.key;
+      if (answers[k] === undefined) return;
+      if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
+        el.value = answers[k];
+      } else if (el.classList.contains('radio-group')) {
+        var radios = el.querySelectorAll('input[type="radio"]');
+        radios.forEach(function (r) {
+          if (r.value === answers[k]) {
+            r.checked = true;
+            r.closest('.radio-row').classList.add('selected');
+          }
+        });
+      }
+    });
+
+    app.querySelectorAll('.radio-group').forEach(function (group) {
+      var radios = group.querySelectorAll('input[type="radio"]');
+      var reveals = group.parentElement.querySelectorAll('[data-reveal-for]');
+      radios.forEach(function (r) {
+        r.addEventListener('change', function () {
+          group.querySelectorAll('.radio-row').forEach(function (row) { row.classList.remove('selected'); });
+          r.closest('.radio-row').classList.add('selected');
+          reveals.forEach(function (revealHost) {
+            var trigger = revealHost.dataset.revealFor;
+            if (r.value === trigger) revealHost.classList.add('show');
+            else revealHost.classList.remove('show');
+          });
+          saveAll();
+        });
+      });
+      var checked = group.querySelector('input[type="radio"]:checked');
+      if (checked) {
+        reveals.forEach(function (revealHost) {
+          if (checked.value === revealHost.dataset.revealFor) revealHost.classList.add('show');
+        });
+      }
+    });
+
+    app.querySelectorAll('textarea, input[type="text"], input[type="email"]').forEach(function (el) {
+      el.addEventListener('input', saveAll);
+    });
+
+    updateUI();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function saveAll() {
+    var app = document.getElementById('app');
+    app.querySelectorAll('[data-key]').forEach(function (el) {
+      var k = el.dataset.key;
+      if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
+        answers[k] = el.value;
+      } else if (el.classList.contains('radio-group')) {
+        var checked = el.querySelector('input[type="radio"]:checked');
+        answers[k] = checked ? checked.value : '';
+      }
+    });
+  }
+
+  function updateUI() {
+    var totalSteps = sections.length - 2;
+    var pct;
+    if (current === 0) pct = 0;
+    else if (current >= sections.length - 1) pct = 100;
+    else pct = Math.round((current / totalSteps) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressPct').textContent = pct + '%';
+    document.getElementById('sectionLabel').textContent = sections[current].label;
+
+    var back = document.getElementById('btnBack');
+    var next = document.getElementById('btnNext');
+    var navBar = document.querySelector('.nav-bar');
+
+    next.style.display = '';
+    back.style.display = '';
+    navBar.style.display = '';
+
+    back.style.visibility = current === 0 ? 'hidden' : 'visible';
+
+    var s = sections[current];
+    if (s.type === 'welcome') {
+      next.textContent = 'Get Started';
+      next.className = 'btn btn-primary';
+    } else if (s.type === 'submit') {
+      next.textContent = 'Submit';
+      next.className = 'btn btn-submit';
+    } else if (s.type === 'done') {
+      navBar.style.display = 'none';
+    } else {
+      next.textContent = 'Continue';
+      next.className = 'btn btn-primary';
+    }
+  }
+
+  function goNext() {
+    saveAll();
+    var s = sections[current];
+
+    if (s.type === 'welcome') {
+      if (!startedSent) {
+        sendEvent('Started', {});
+        startedSent = true;
+      }
+    } else if (s.type === 'question') {
+      var payload = {};
+      payload[s.qKey] = answers[s.qKey] || '';
+      var otherKey = s.qKey + '_other';
+      if (answers[otherKey]) payload[otherKey] = answers[otherKey];
+      sendEvent('Q' + s.qNum + ' answered', payload);
+    } else if (s.type === 'submit') {
+      sendEvent('Submitted', {});
+    }
+
+    if (current < sections.length - 1) {
+      current++;
+      render();
+    }
+  }
+
+  function goBack() {
+    saveAll();
+    if (current > 0) { current--; render(); }
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && e.metaKey) goNext();
+  });
+
+  render();
+</script>
+</body>
+</html>
